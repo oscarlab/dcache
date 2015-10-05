@@ -3,10 +3,10 @@
 For more details about the principles and designs of this optimization, please
 see this paper:
 
-*How to Get More Value From Your File System Directory Cache*<br>
+**How to Get More Value From Your File System Directory Cache**<br>
 [download](http://www3.cs.stonybrook.edu/~porter/pubs/sosp15-final.pdf)<br>
-**Chia-Che Tsai, Yang Zhan, Jayashree Reddy, Yizheng Jiao, Tao Zhang,
-Donald E. Porter (Stony Brook University)**<br>
+*Chia-Che Tsai, Yang Zhan, Jayashree Reddy, Yizheng Jiao, Tao Zhang,
+Donald E. Porter (Stony Brook University)*<br>
 Published in SOSP 2015
 
 This code is a optimized design of Linux directory cache, to improve hit latency
