@@ -1,0 +1,198 @@
+menu "dcache optimizations"
+
+config DCACHE_FAST
+	bool "Use fastpath in dcache"
+	default y
+
+if !DCACHE_FAST
+
+config DCACHE_FAST_STRUCTURE_ONLY
+	bool "Only have structure"
+	default n
+
+if DCACHE_FAST_STRUCTURE_ONLY
+
+config PATH_SIGNATURE_SIZE
+	int "Path signature size"
+	default 256
+
+endif
+
+endif
+
+if DCACHE_FAST
+
+config DCACHE_FAST_HASHTABLE_ORDER
+	int "DLHT order of size"
+	default 16
+
+config DCACHE_FAST_DUMMY
+	bool "Dummy"
+	default n
+
+config DCACHE_FAST_SKIP
+	bool "Skip fastpath lookup"
+	default n
+
+config DCACHE_FAST_FORCE_MISS
+	bool "Force fastpath lookup miss"
+	default n
+
+config DCACHE_FORCE_CANONICAL
+	bool "Force canonicalizing paths for lookup"
+	default y
+
+choice
+	prompt "Credential identifier strategy"
+	default DCACHE_CRED_PCC
+config DCACHE_CRED_UID
+	bool "User ID as credential"
+config DCACHE_CRED_ID
+	bool "Credential ID"
+config DCACHE_CRED_PCC
+	bool "Prefix check cache in credentials"
+endchoice
+
+if DCACHE_CRED_UID || DCACHE_CRED_ID
+config DCACHE_PCC_SIZE
+	int "Prefix check cache size in dentries"
+	default 4
+endif
+
+if DCACHE_CRED_PCC
+config CRED_PCC_ASSOCIATIVITY
+	int "Prefix check cache associativity in credentials"
+	default 2
+config CRED_PCC_SIZE
+	int "Prefix check cache size in credentials (has to be order of 2)"
+	default 4096
+
+endif
+
+choice
+	prompt "Path signature algorithm"
+	default PATH_SIGNATURE_MHASH64
+config PATH_SIGNATURE_SIMPLE
+	bool "Simple"
+	select USE_DEFAULT_SIGNATURE_SCHEME
+config PATH_SIGNATURE_JELKINS_OLD
+	bool "Jelkins (old)"
+	select USE_DEFAULT_SIGNATURE_SCHEME
+config PATH_SIGNATURE_JELKINS_LOOKUP3
+	bool "Jelkins (lookup3)"
+	select USE_DEFAULT_SIGNATURE_SCHEME
+config PATH_SIGNATURE_JELKINS_SPOOKY
+	bool "Jelkins (spooky)"
+	select USE_DEFAULT_SIGNATURE_SCHEME
+config PATH_SIGNATURE_MHASH64
+	bool "mhash64"
+	select USE_MHASH
+config PATH_SIGNATURE_MHASH
+	bool "mhash"
+	select USE_MHASH
+config PATH_SIGNATURE_MHASH_AVX2
+	bool "mhash (AVX2)"
+	select USE_MHASH
+config PATH_SIGNATURE_AES_KHASH
+	bool "AES khash"
+	select USE_DEFAULT_SIGNATURE_SCHEME
+	depends on CRYPTO_AES_NI_INTEL = y
+endchoice
+
+config USE_DEFAULT_SIGNATURE_SCHEME
+	def_bool n
+
+config USE_MHASH
+	def_bool n
+
+config PATH_SIGNATURE_SIZE
+	int "Path signature size"
+	range 64 64 if PATH_SIGNATURE_SIMPLE || PATH_SIGNATURE_JELKINS_OLD || PATH_SIGNATURE_JELKINS_LOOKUP3
+	range 128 128 if PATH_SIGNATURE_JELKINS_SPOOKY
+	range 64 256 if PATH_SIGNATURE_MHASH64
+	range 64 256 if PATH_SIGNATURE_MHASH
+	range 256 256 if PATH_SIGNATURE_MHASH256
+	range 256 256 if PATH_SIGNATURE_MHASH_AVX2
+	range 256 256 if PATH_SIGNATURE_AES_KHASH
+	default 256
+
+config DCACHE_FAST_DEEP_DENTRIES
+	def_bool n
+
+config DCACHE_FAST_SYMLINK
+	bool "Symlink lookup"
+	select DCACHE_FAST_DEEP_DENTRIES
+	default y
+
+config DCACHE_FAST_DEEP_NEGATIVE
+	bool "Create deep negative dentries"
+	select DCACHE_FAST_DEEP_DENTRIES
+	default y
+
+config DCACHE_FAST_DEEP_NOTDIR
+	bool "Create deep not-a-directory dentries"
+	select DCACHE_FAST_DEEP_DENTRIES
+	default y
+
+config DCACHE_FAST_PROFILING
+	bool "Profile dcache fastpath"
+	default n
+
+endif # DCACHE_FAST
+
+config DCACHE_COMPLETENESS
+	bool "Trace directory completeness"
+	default y
+
+if DCACHE_COMPLETENESS
+
+config DCACHE_COMPLETENESS_FORCE_MISS
+	bool "Force miss on a complete directory"
+	default n
+
+config DCACHE_COMPLETE_NEWDIR
+	bool "Mark new directory complete"
+	default y
+
+config DCACHE_SKIP_LOOKUP_IF_COMPLETE
+	bool "Skip storage lookup if directory is complete"
+	default y
+
+endif
+
+config DCACHE_AGGRESSIVE_NEGATIVE
+	bool "Aggressively creating negative dentries"
+	default y
+
+if DCACHE_AGGRESSIVE_NEGATIVE
+config DCACHE_AGGRESSIVE_NEGATIVE_IN_LIBFS
+	bool "Create a negative dentry for in-memory filesystem"
+	default y
+config DCACHE_AGGRESSIVE_NEGATIVE_AT_RENAME
+	bool "Create a negative dentry for rename"
+	default y
+config DCACHE_AGGRESSIVE_NEGATIVE_AT_UNLINK
+	bool "Create a negative dentry for unlink"
+	default y
+endif
+
+config DCACHE_DEBUG
+	bool "Debug dcache"
+	default n
+
+if DCACHE_DEBUG
+config DCACHE_PRINTK_LEVEL
+	string "Printk level"
+	default "7"
+config DCACHE_DEBUG_ERROR
+	bool "Debug error"
+	default y
+config DCACHE_DEBUG_INFO
+	bool "Debug info"
+	default y
+config DCACHE_DEBUG_DETAIL
+	bool "Debug detail"
+	default n
+endif
+
+endmenu
